@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyDieta - Gestione Integrata</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header Applicazione -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-text">
+          <h1>MyDieta</h1>
+          <p>Registro Clinico, Nutrizionale e Terapeutico Personale</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline-print" id="btnPrintReport">
+          🖨️ Stampa Report Medico
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigazione a Schede (Single Page App) -->
+  <nav class="app-nav">
+    <div class="nav-container">
+      <button class="nav-btn active" data-tab="diet">
+        🥗 Registro 
+      </button>
+      <button class="nav-btn" data-tab="medications">
+        💊 Farmaci & Terapia
+      </button>
+      <button class="nav-btn" data-tab="plan">
+        📅 Piano Alimentare
+      </button>
+      <button class="nav-btn" data-tab="sport">
+        🏃 Attività
+      </button>
+      <button class="nav-btn" data-tab="pressure">
+        ❤️ Pressione Arteriosa
+      </button>
+      <button class="nav-btn" data-tab="report">
+        📄 Dossier Medico
+      </button>
+    </div>
+  </nav>
+
+  <!-- Area Principale -->
+  <main class="app-main">
+
+    <!-- ========================================== -->
+    <!-- SCHEDA 1: CONTROLLO DIETA E PESO          -->
+    <!-- ========================================== -->
+    <section class="tab-pane active" id="tab-diet">
+      <!-- Data Selector & Daily Summary Cards -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-body" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <label for="dietDateInput" style="font-weight:700; color:var(--text-main);">Seleziona Data:</label>
+            <input type="date" id="dietDateInput" style="width: auto;">
+          </div>
+          <div>
+            <span style="font-size:0.9rem; color:var(--text-muted);">Peso Registrato per questa giornata:</span>
+            <strong id="todayWeightDisplay" style="margin-left:0.5rem; font-size:1.1rem; color:var(--primary-dark);">-- kg</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Colonna Sinistra: Diario Pasti con pasti dettagliati -->
+        <div class="card">
+          <div class="card-header">
+            <h2>🍽️ Diario Alimentare Giornaliero</h2>
+          </div>
+          <div class="card-body">
+            <!-- Form Aggiungi Cibo Rapido -->
+            <form id="formFood" style="background:#f8fafc; padding:1rem; border-radius:var(--radius-sm); margin-bottom:1.5rem; border:1px solid var(--border-color);">
+              <h4 style="margin-bottom:0.75rem; font-size:0.95rem; color:var(--text-main);">+ Registra Alimento Assunto</h4>
+              <div class="form-row">
+                <div class="form-group" style="flex:1.5;">
+                  <label>Pasto</label>
+                  <select id="foodMealType">
+                    <option value="prima_colazione">Prima Colazione</option>
+                    <option value="seconda_colazione">Seconda Colazione</option>
+                    <option value="pranzo">Pranzo</option>
+                    <option value="merenda">Merenda</option>
+                    <option value="cena">Cena</option>
+                    <option value="altro">Altro / Extra</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex:2;">
+                  <label>Alimento / Descrizione</label>
+                  <input type="text" id="foodName" list="foodSuggestions" placeholder="es. Riso integrale, Mela, ecc." autocomplete="off" required>
+                  <datalist id="foodSuggestions"></datalist>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-3">
+                  <label>Grammi</label>
+                  <input type="number" id="foodGrams" placeholder="es. 100" step="any">
+                </div>
+                <div class="form-group col-9">
+                  <label>Note</label>
+                  <input type="text" id="foodNotes" placeholder="Note sull'alimento o preparazione...">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%;">Aggiungi al Diario</button>
+            </form>
+
+            <!-- Elenco Pasti raggruppati -->
+            <div id="foodGroupsContainer">
+              <!-- Popolato dinamicamente da App.renderFoodDiary -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonna Destra: Peso Corporeo & Storico -->
+        <div>
+          <!-- Registrazione Peso -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <h2>⚖️ Registra Peso Corporeo</h2>
+            </div>
+            <div class="card-body">
+              <form id="formWeight">
+                <div class="form-row">
+                  <div class="form-group col-2">
+                    <label>Peso (kg)</label>
+                    <input type="number" id="inputWeight" step="0.1" min="20" max="350" placeholder="es. 74.5" required>
+                  </div>
+                  <div class="form-group col-2">
+                    <label>Ora</label>
+                    <input type="time" id="inputWeightTime" required>
+                  </div>
+                  <div class="form-group col-8">
+                    <label>Note</label>
+                    <input type="text" id="inputWeightNotes" placeholder="Note facoltative">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Salva Peso</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Storico Peso -->
+          <div class="card">
+            <div class="card-header">
+              <h3>📈 Storico Recente del Peso</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Ora</th>
+                      <th>Peso</th>
+                      <th>Note</th>
+                      <th style="text-align:right;">Azione</th>
+                    </tr>
+                  </thead>
+                  <tbody id="weightHistoryTableBody">
+                    <!-- Popolato dinamicamente -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SCHEDA 2: PIANO ALIMENTARE SETTIMANALE     -->
+    <!-- ========================================== -->
+    <section class="tab-pane" id="tab-plan">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>📅 Piano Nutrizionale Settimanale (Lunedì - Domenica)</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">
+              Include: <strong>Prima Colazione</strong>, <strong>Seconda Colazione</strong>, <strong>Pranzo</strong>, <strong>Merenda</strong> e <strong>Cena</strong>.
+              Fai clic su qualsiasi cella per digitare o modificare direttamente gli alimenti previsti. Le modifiche vengono salvate automaticamente all'uscita dal campo.
+            </p>
+          </div>
+          <button class="btn btn-primary" onclick="App.saveEntirePlan()">
+            💾 Salva Tutto
+          </button>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="table-responsive">
+            <table class="plan-table">
+              <thead>
+                <tr>
+                  <th class="meal-col-head">Pasto Previsto</th>
+                  <th>Lunedì</th>
+                  <th>Martedì</th>
+                  <th>Mercoledì</th>
+                  <th>Giovedì</th>
+                  <th>Venerdì</th>
+                  <th>Sabato</th>
+                  <th>Domenica</th>
+                </tr>
+              </thead>
+              <tbody id="mealPlanTableBody">
+                <!-- Generato dinamicamente via JS con le 5 righe pasto per i 7 giorni -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SCHEDA 3: SPORT & ATTIVITÀ FISICA          -->
+    <!-- ========================================== -->
+    <section class="tab-pane" id="tab-sport">
+      <div class="grid-2">
+        <!-- Form Registra Attività -->
+        <div class="card">
+          <div class="card-header">
+            <h2>🏃 Registra Attività Sportiva</h2>
+          </div>
+          <div class="card-body">
+            <form id="formSport">
+              <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                  <label>Data</label>
+                  <input type="date" id="sportDate" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label>Ora Inizio</label>
+                  <input type="time" id="sportStartTime" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label>Ora Fine</label>
+                  <input type="time" id="sportEndTime" required>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:1rem;">
+                <label>Attività Svolta</label>
+                <input type="text" id="sportActivity" placeholder="es. Corsa, Camminata veloce, Nuoto, Palestra, Ciclismo..." required>
+              </div>
+              <div class="form-group" style="margin-bottom:1.25rem;">
+                <label>Note / Dettagli</label>
+                <textarea id="sportNotes" rows="3" placeholder="Note sulla sessione, intensità, percorso, sensazioni..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Salva Sessione Sportiva</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Storico Attività Sportive -->
+        <div class="card">
+          <div class="card-header">
+            <h3>📋 Registro Attività Sportive</h3>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Orario</th>
+                    <th>Attività</th>
+                    <th>Note</th>
+                    <th style="text-align:right;">Azione</th>
+                  </tr>
+                </thead>
+                <tbody id="sportHistoryTableBody">
+                  <!-- Popolato dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SCHEDA 4: MONITORAGGIO PRESSIONE ARTERIOSA -->
+    <!-- ========================================== -->
+    <section class="tab-pane" id="tab-pressure">
+      <!-- Media e Statistiche PA -->
+      <div class="grid-3">
+        <div class="stat-card">
+          <span class="stat-label">Media Sistolica (Massima)</span>
+          <div class="stat-value" id="bpAvgSys">-- <span class="stat-unit">mmHg</span></div>
+          <div class="stat-footer">Valore ideale: &lt; 120 mmHg</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Media Diastolica (Minima)</span>
+          <div class="stat-value" id="bpAvgDia">-- <span class="stat-unit">mmHg</span></div>
+          <div class="stat-footer">Valore ideale: &lt; 80 mmHg</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Frequenza Cardiaca Media</span>
+          <div class="stat-value" id="bpAvgPulse">-- <span class="stat-unit">bpm</span></div>
+          <div class="stat-footer">Battiti cardiaci a riposo</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Form Nuova Misurazione -->
+        <div class="card">
+          <div class="card-header">
+            <h2>🩺 Nuova Misurazione Pressione Arteriosa</h2>
+          </div>
+          <div class="card-body">
+            <form id="formPressure">
+              <div class="form-group">
+                <label>Data e Ora Misurazione</label>
+                <input type="datetime-local" id="bpMeasuredAt" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Sistolica (Massima) <small>mmHg</small></label>
+                  <input type="number" id="bpSystolic" min="50" max="250" placeholder="es. 120" required>
+                </div>
+                <div class="form-group">
+                  <label>Diastolica (Minima) <small>mmHg</small></label>
+                  <input type="number" id="bpDiastolic" min="30" max="180" placeholder="es. 80" required>
+                </div>
+                <div class="form-group">
+                  <label>Pulsazioni <small>bpm</small></label>
+                  <input type="number" id="bpPulse" min="30" max="220" placeholder="es. 70" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Note / Circostanze</label>
+                <input type="text" id="bpNotes" placeholder="es. A riposo, dopo passeggiata, mattina a digiuno">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%;">Registra Misurazione</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tabella Ultime Misurazioni -->
+        <div class="card">
+          <div class="card-header">
+            <h2>📋 Storico Misurazioni PA</h2>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Data & Ora</th>
+                    <th>Pressione</th>
+                    <th>Pulsazioni</th>
+                    <th>Stato</th>
+                    <th>Note</th>
+                    <th style="text-align:right;">Azione</th>
+                  </tr>
+                </thead>
+                <tbody id="bpTableBody">
+                  <!-- Popolato via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SCHEDA 4: REGISTRO FARMACI & TERAPIA       -->
+    <!-- ========================================== -->
+    <section class="tab-pane" id="tab-medications">
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-body" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <label for="medDateInput" style="font-weight:700;">Data Somministrazione:</label>
+            <input type="date" id="medDateInput" style="width:auto;">
+          </div>
+          <div style="display:flex; align-items:center; gap:1rem;">
+            <span id="medStatusCount" class="bp-badge bp-high-normal">0 / 0 Assunti</span>
+            <button class="btn btn-primary" onclick="App.openAddMedModal()">
+              + Nuovo Farmaco in Terapia
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>💊 Checklist Somministrazione Giornaliera</h2>
+          <span style="font-size:0.85rem; color:var(--text-muted);">Metti la spunta per confermare l'avvenuta assunzione</span>
+        </div>
+        <div class="card-body">
+          <div id="medsChecklistContainer">
+            <!-- Popolato dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SCHEDA 5: ANTEPRIMA REPORT CLINICO         -->
+    <!-- ========================================== -->
+    <section class="tab-pane" id="tab-report">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h2>📄 Configurazione e Filtro Report Medico</h2>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-secondary" id="btnPreviewReport">🔄 Aggiorna Dati</button>
+            <button class="btn btn-primary" onclick="App.generateAndPrintReport()">🖨️ Stampa / Salva in PDF</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Data Inizio</label>
+              <input type="date" id="reportStartDate">
+            </div>
+            <div class="form-group">
+              <label>Data Fine</label>
+              <input type="date" id="reportEndDate">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anteprima a schermo dello stesso documento formattato -->
+      <div class="card">
+        <div class="card-body" id="reportPreviewArea" style="background:#ffffff; padding:2rem; font-family:var(--font-sans);">
+          <!-- Generato da buildReportHtml() -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Area di Stampa Dedicata (Visibile solo durante @media print) -->
+  <div id="printReportArea"></div>
+
+  <!-- Modale Aggiungi / Modifica Farmaco -->
+  <div class="modal-overlay" id="modalMedication">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="medModalTitle">Farmaco in Terapia</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="formMedication">
+        <div class="modal-body">
+          <input type="hidden" id="medId">
+          <div class="form-group">
+            <label>Nome Commerciale / Principio Attivo *</label>
+            <input type="text" id="medName" placeholder="es. Cardioaspirina, Ramipril, ecc." required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Dosaggio *</label>
+              <input type="text" id="medDosage" placeholder="es. 100 mg, 1 compressa" required>
+            </div>
+            <div class="form-group">
+              <label>Orario Previsto</label>
+              <input type="time" id="medTime" value="08:00" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Indicazioni o Note di Somministrazione</label>
+            <textarea id="medNotes" rows="2" placeholder="es. Da assumere a stomaco pieno dopo la colazione"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Annulla</button>
+          <button type="submit" class="btn btn-primary">Salva Farmaco</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contenitore Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Script Applicazione -->
+  <script src="js/app.js"></script>
+</body>
+</html>
