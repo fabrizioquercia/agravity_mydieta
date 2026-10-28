@@ -12,6 +12,24 @@ function get_db_path() {
 function get_db_connection() {
     static $pdo = null;
     if ($pdo === null) {
+        if (!extension_loaded('pdo_sqlite')) {
+            $msg = "Estensione PHP 'pdo_sqlite' non caricata o non abilitata nel file php.ini.\n"
+                 . "Per risolvere:\n"
+                 . "1) Apri il tuo php.ini\n"
+                 . "2) Assicurati che 'extension_dir = \"ext\"' sia decommentato\n"
+                 . "3) Assicurati che 'extension=pdo_sqlite' sia decommentato (rimuovi il punto e virgola iniziale)\n"
+                 . "4) Riavvia il server PHP.";
+            write_app_log('DB_DRIVER_MISSING', ['error' => 'pdo_sqlite extension missing']);
+            if (php_sapi_name() !== 'cli') {
+                http_response_code(500);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'error' => $msg], JSON_UNESCAPED_UNICODE);
+                exit;
+            } else {
+                die("\n[ERRORE FATALE] " . $msg . "\n\n");
+            }
+        }
+
         $dbPath = get_db_path();
         $isNew = !file_exists($dbPath);
         
